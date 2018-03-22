@@ -16,17 +16,20 @@ import java.nio.file.StandardOpenOption;
 public class Log {
     private static final String LOG_FOLDER = "logs";
     private FileWriter fileWriter;
-    private final Path file = Paths.get(LOG_FOLDER, "" + System.currentTimeMillis());
+    static final Path file = Paths.get(LOG_FOLDER, "" + System.currentTimeMillis());
 
 
     @After(value = "call(void Grid.placeStone(int, int, Player)) && args(x, y, player)", argNames = "x,y,player")
     public void placeStone(int x, int y, Player player) {
-        String line = String.format("name:%s;x:%d;y%d\n", player.getName(), x, y);
+        String line = String.format("name:%s;x:%d;y%d", player.getName(), x, y);
+        log(line);
+    }
+
+    static void log(String line) {
         try {
-            Files.write(this.file, line.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            Files.write(file, (line+"\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }
