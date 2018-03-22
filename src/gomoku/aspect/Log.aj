@@ -1,8 +1,8 @@
 package gomoku.aspect;
 
-import gomoku.core.Player;
+import gomoku.core.model.Spot;
 import gomoku.core.model.Grid;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 
 import java.io.FileWriter;
@@ -19,15 +19,17 @@ public class Log {
     static final Path file = Paths.get(LOG_FOLDER, "" + System.currentTimeMillis());
 
 
-    @After(value = "call(void Grid.placeStone(int, int, Player)) && args(x, y, player)", argNames = "x,y,player")
-    public void placeStone(int x, int y, Player player) {
-        String line = String.format("name:%s;x:%d;y%d", player.getName(), x, y);
+    @AfterReturning(
+            value = "call(void Grid.notifyStonePlaced(Spot)) && args(spot)"
+    )
+    public void placeStone(Spot spot) {
+        String line = String.format("name:%s;x:%d;y%d", spot.getOccupant().getName(), spot.x, spot.y);
         log(line);
     }
 
     static void log(String line) {
         try {
-            Files.write(file, (line+"\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            Files.write(file, (line + "\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             e.printStackTrace();
         }
